@@ -64,14 +64,14 @@ public class WebSecurityConfigurerAdapterExtension extends WebSecurityConfigurer
     @Autowired
     private JwtOncePerRequestFilterExtension jwtRequestFilter;
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        // configure AuthenticationManager so that it knows from where to load
-        // user for matching credentials
-        // Use BCryptPasswordEncoder
-        //auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
-        auth.userDetailsService(jwtUserDetailsService).passwordEncoder(new BCryptPasswordEncoder());
-    }
+//    @Autowired
+//    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+//        // configure AuthenticationManager so that it knows from where to load
+//        // user for matching credentials
+//        // Use BCryptPasswordEncoder
+//        //auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
+//        auth.userDetailsService(jwtUserDetailsService).passwordEncoder(new BCryptPasswordEncoder());
+//    }
 //
 //    //@SuppressWarnings("deprecation")
 //    @Bean
@@ -92,16 +92,18 @@ public class WebSecurityConfigurerAdapterExtension extends WebSecurityConfigurer
         return filter;
     }
 
-//    @Override
-//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 ////        auth.userDetailsService(jwtUserDetailsService).passwordEncoder(new BCryptPasswordEncoder());
 ////        auth.userDetailsService(jwtUserDetailsService).passwordEncoder(NoOpPasswordEncoder.getInstance());
 ////        auth.inMemoryAuthentication().passwordEncoder(new BCryptPasswordEncoder());
-////        auth.inMemoryAuthentication()
-////                .withUser("user").password((new BCryptPasswordEncoder().encode("123456"))).roles("USER").and()
-////                .withUser("manager").password((new BCryptPasswordEncoder().encode("123456"))).roles("MANAGER").and()
-////                .withUser("admin").password((new BCryptPasswordEncoder().encode("123456"))).roles("ADMIN", "MANAGER", "USER");
-//    }
+        auth.userDetailsService(jwtUserDetailsService).passwordEncoder(new BCryptPasswordEncoder());
+        auth.inMemoryAuthentication()
+                .withUser("user").password((new BCryptPasswordEncoder().encode("123456"))).roles("USER").and()
+                .withUser("manager").password((new BCryptPasswordEncoder().encode("123456"))).roles("MANAGER").and()
+                .withUser("admin").password((new BCryptPasswordEncoder().encode("123456"))).roles("ADMIN", "MANAGER", "USER");
+    }
+
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         // if not using APIs annotations use this configuration

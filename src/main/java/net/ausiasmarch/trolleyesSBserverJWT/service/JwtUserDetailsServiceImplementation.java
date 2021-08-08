@@ -31,8 +31,10 @@ package net.ausiasmarch.trolleyesSBserverJWT.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -45,14 +47,28 @@ public class JwtUserDetailsServiceImplementation implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if ("rafa".equals(username)) {
-            System.out.println("JwtUserDetailsService: loadUserByUsername: password: " + new BCryptPasswordEncoder().encode("rafa"));
-            return new User("rafa", new BCryptPasswordEncoder().encode("rafa"), new ArrayList<>());
-            //return new User("rafa", new BCryptPasswordEncoder().encode("rafa"),  
-            //        new ArrayList<GrantedAuthority>(Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"))));
+        String pass = new BCryptPasswordEncoder().encode("123456");
+        if ("user".equals(username)) {
+            return this.userBuilder(username, pass, "USER");
+        } else if ("manager".equals(username)) {
+            return this.userBuilder(username, pass, "MANAGER");
+        } else if ("admin".equals(username)) {
+            return this.userBuilder(username, pass, "USER", "MANAGER", "ADMIN");
         } else {
-            throw new UsernameNotFoundException("User not found with username: " + username);
+            throw new UsernameNotFoundException("User not found");
         }
+    }
+
+    private User userBuilder(String username, String password, String... roles) {
+        boolean userEnabled = true;
+        boolean accountNotExpired = true;
+        boolean credentialsNotExpired = true;
+        boolean accountNotLocked = true;
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        for (String role : roles) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+        }
+        return new User(username, password, userEnabled, accountNotExpired, credentialsNotExpired, accountNotLocked, authorities);
     }
 
 }
