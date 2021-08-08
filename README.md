@@ -1,2 +1,2 @@
-# trolleyes-SERVER-SB-SS-JWT-1USER-noROLLES-DeCentralized
-Trolleyes SERVER - Spring Boot - Spring Security - JWT - 1USER - noROLLES - DeCentralized
+# trolleyes-SERVER-SB-SS-JWT-3ROLLES-DC
+trolleyes-SERVER-SB-SS-JWT-3ROLLES-DC
