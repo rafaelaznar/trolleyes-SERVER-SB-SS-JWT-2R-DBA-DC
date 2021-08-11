@@ -77,11 +77,13 @@ public class UsuarioController {
     @Autowired
     FillService oFillService;
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("@UsuarioAccessHandlerComponent.canGet(#id)")
+    //@PreAuthorize("@UsuarioBean.getId()==1")
     //@PreAuthorize("hasRole('ADMIN') or !hasRole('ADMIN') and #authUser.id == #userId")
     //@PreAuthorize("hasPermission(#id, 'usuario', 'GET')")
-    @GetMapping("/user/{id}")
-    public ResponseEntity<?> get_USER(@PathVariable(value = "id") Long id,
+    @GetMapping("/{id}")
+    public ResponseEntity<?> get_USER(
+            @PathVariable(value = "id") Long id,
             Authentication authentication,
             Principal principal,
             @AuthenticationPrincipal User user
@@ -94,22 +96,14 @@ public class UsuarioController {
         System.out.println("Authorities: " + authentication.getAuthorities());
         System.out.println("Credentials: " + authentication.getCredentials());
         System.out.println("username from user: " + user.getUsername());
-
         System.out.println("-----------------");
-
-        //    if (oUsuarioEntityFromSession.getTipousuario().getId() == 1) { //administrador
+        
         if (oUsuarioRepository.existsById(id)) {
             return new ResponseEntity<UsuarioEntity>(oUsuarioRepository.getOne(id), HttpStatus.OK);
         } else {
             return new ResponseEntity<UsuarioEntity>(oUsuarioRepository.getOne(id), HttpStatus.NOT_FOUND);
         }
-        //  } else {  //cliente
-//                if (id.equals(oUsuarioEntityFromSession.getId())) {  //los datos pedidos por el cliente son sus propios datos?
-//                    return new ResponseEntity<UsuarioEntity>(oUsuarioRepository.getOne(id), HttpStatus.OK);
-//                } else {
-//                    return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-        //      }
-        //}
+
 
     }
 
@@ -131,35 +125,46 @@ public class UsuarioController {
 //            }
 //        }
 //    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/admin")
-    public ResponseEntity<?> getAdmin() {
-        if (oUsuarioRepository.count() <= 1000) {
-            return new ResponseEntity<List<UsuarioEntity>>(oUsuarioRepository.findAll(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(null, HttpStatus.PAYLOAD_TOO_LARGE);
-        }
+    @PreAuthorize("@AccessHandler.canGet(#id)")
+    //@PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/{id}")
+    public ResponseEntity<?> getAdmin(
+            @PathVariable(value = "id") Long id,
+            Authentication authentication,
+            Principal principal,
+            @AuthenticationPrincipal User user
+    ) {
+        System.out.println("get_Admin.. " + id);
+        System.out.println("Name:" + principal.getName());
+        return new ResponseEntity<UsuarioEntity>(oUsuarioRepository.getOne(1L), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('USER')")
-    @GetMapping("/user")
-    public ResponseEntity<?> getUser() {
-        if (oUsuarioRepository.count() <= 1000) {
-            return new ResponseEntity<List<UsuarioEntity>>(oUsuarioRepository.findAll(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(null, HttpStatus.PAYLOAD_TOO_LARGE);
-        }
+    @PreAuthorize("@AccessHandler.canGet(#id)")
+    //@PreAuthorize("hasRole('USER')")
+    @GetMapping("/user/{id}")
+    public ResponseEntity<?> getUser(
+            @PathVariable(value = "id") Long id,
+            Authentication authentication,
+            Principal principal,
+            @AuthenticationPrincipal User user
+    ) {
+        System.out.println("get_User.. " + id);
+        System.out.println("Name:" + principal.getName());
+        return new ResponseEntity<UsuarioEntity>(oUsuarioRepository.getOne(3L), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('MANAGER')")
-    @GetMapping("/manager")
-    public ResponseEntity<?> getManager() {
-        if (oUsuarioRepository.count() <= 1000) {
-            return new ResponseEntity<List<UsuarioEntity>>(oUsuarioRepository.findAll(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(null, HttpStatus.PAYLOAD_TOO_LARGE);
-        }
+    @PreAuthorize("@AccessHandler.canGet(#id)")
+    //@PreAuthorize("hasRole('MANAGER')")
+    @GetMapping("/manager/{id}")
+    public ResponseEntity<?> getManager(
+            @PathVariable(value = "id") Long id,
+            Authentication authentication,
+            Principal principal,
+            @AuthenticationPrincipal User user
+    ) {
+        System.out.println("get_Manager.. " + id);
+        System.out.println("Name:" + principal.getName());
+        return new ResponseEntity<UsuarioEntity>(oUsuarioRepository.getOne(2L), HttpStatus.OK);
     }
 
     @PostMapping("/")

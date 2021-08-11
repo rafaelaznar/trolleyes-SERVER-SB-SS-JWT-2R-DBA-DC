@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>net.ausiasmarch</groupId>
-    <artifactId>trolleyes-SERVER-SB-SS-JWT-3ROLLES-DC</artifactId>
+    <artifactId>trolleyes-SERVER-SB-SS-JWT-2R-DBA-DC</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>trolleyes-SERVER-SB-SS-JWT-3ROLLES-DC</name>
+    <name>trolleyes-SERVER-SB-SS-JWT-2R-DBA-DC</name>
     <description>Demo project for Spring Boot</description>
 
     <properties>

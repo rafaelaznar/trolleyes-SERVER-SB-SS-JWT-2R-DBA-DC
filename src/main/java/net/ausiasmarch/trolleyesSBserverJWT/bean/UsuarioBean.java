@@ -50,4 +50,9 @@ public class UsuarioBean {
         this.password = password;
     }
 
+    public int getId() {
+        return 1;
+    }
+    
+    
 }

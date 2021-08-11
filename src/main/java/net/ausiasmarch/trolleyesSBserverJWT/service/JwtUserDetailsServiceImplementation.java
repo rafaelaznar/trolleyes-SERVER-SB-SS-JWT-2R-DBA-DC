@@ -32,9 +32,12 @@ package net.ausiasmarch.trolleyesSBserverJWT.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import net.ausiasmarch.trolleyesSBserverJWT.entity.UsuarioEntity;
+import net.ausiasmarch.trolleyesSBserverJWT.repository.TipousuarioRepository;
+import net.ausiasmarch.trolleyesSBserverJWT.repository.UsuarioRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -45,17 +48,22 @@ import org.springframework.stereotype.Service;
 @Service
 public class JwtUserDetailsServiceImplementation implements UserDetailsService {
 
+    @Autowired
+    UsuarioRepository oUsuarioRepository;
+
+    @Autowired
+    TipousuarioRepository oTipousuarioRepository;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        String pass = new BCryptPasswordEncoder().encode("123456");
-        if ("user".equals(username)) {
-            return this.userBuilder(username, pass, "USER");
-        } else if ("manager".equals(username)) {
-            return this.userBuilder(username, pass, "MANAGER");
-        } else if ("admin".equals(username)) {
-            return this.userBuilder(username, pass, "USER", "MANAGER", "ADMIN");
+        UsuarioEntity user = oUsuarioRepository.findByLogin(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found with username: " + username);
+        }
+        if (user.getTipousuario().getId() == 1) {
+            return userBuilder(user.getLogin(), user.getPassword(), "ADMIN");
         } else {
-            throw new UsernameNotFoundException("User not found");
+            return userBuilder(user.getLogin(), user.getPassword(), "USER");
         }
     }
 
