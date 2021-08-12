@@ -62,6 +62,10 @@ public class JwtAuthenticationController {
 
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
     public ResponseEntity<?> generateAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
+        // Spring Security gets username & password from token without any change
+        // our password comes from token with SHA-256 encription (see JwtUserDetailsServiceImplementation)
+        System.out.println("generateAuthenticationToken: username: " + authenticationRequest.getUsername());
+        System.out.println("generateAuthenticationToken: password: " + authenticationRequest.getPassword());
         authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
         final UserDetails userDetails = jwtInMemoryUserDetailsService.loadUserByUsername(authenticationRequest.getUsername());
         final String token = jwtTokenUtil.generateToken(userDetails);

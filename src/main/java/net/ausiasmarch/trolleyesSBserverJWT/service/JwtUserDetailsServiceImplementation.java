@@ -36,6 +36,7 @@ import net.ausiasmarch.trolleyesSBserverJWT.entity.UsuarioEntity;
 import net.ausiasmarch.trolleyesSBserverJWT.repository.TipousuarioRepository;
 import net.ausiasmarch.trolleyesSBserverJWT.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -43,6 +44,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -54,16 +56,27 @@ public class JwtUserDetailsServiceImplementation implements UserDetailsService {
     @Autowired
     TipousuarioRepository oTipousuarioRepository;
 
+    @Bean
+    PasswordEncoder getPassEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UsuarioEntity user = oUsuarioRepository.findByLogin(username);
         if (user == null) {
             throw new UsernameNotFoundException("User not found with username: " + username);
         }
+        System.out.println("loadUserByUsername: password: " + user.getPassword());
+        //registration: the pass comes sha256 encoded from the AJAX client
+        //program must store the pass in the database sha256 encoded
+        //program takes pass sha256 encoded pass from db
+        //as the pass is not bcript saved in db we have to pass bcrypt encoded to Spring security
+        //because in WebSecurityConfigurerAdapterExtension we force SprSec to use Bcrypt algorithm
         if (user.getTipousuario().getId() == 1) {
-            return userBuilder(user.getLogin(), user.getPassword(), "ADMIN");
+            return userBuilder(user.getLogin(), getPassEncoder().encode(user.getPassword()), "ADMIN");
         } else {
-            return userBuilder(user.getLogin(), user.getPassword(), "USER");
+            return userBuilder(user.getLogin(), getPassEncoder().encode(user.getPassword()), "USER");
         }
     }
 
