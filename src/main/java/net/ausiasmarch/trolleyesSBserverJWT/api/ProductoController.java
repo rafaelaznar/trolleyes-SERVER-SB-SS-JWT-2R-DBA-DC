@@ -56,7 +56,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@PreAuthorize("permitAll()")
+//@PreAuthorize("permitAll()")
 @RestController
 @RequestMapping("/producto")
 public class ProductoController {
@@ -98,11 +98,13 @@ public class ProductoController {
         }
     }
 
+    @PreAuthorize("permitAll()")
     @GetMapping("/count")
     public ResponseEntity<?> count() {
         return new ResponseEntity<Long>(oProductoRepository.count(), HttpStatus.OK);
     }
 
+    
     @PostMapping("/")
     public ResponseEntity<?> create(@RequestBody ProductoEntity oProductoEntityFromRequest) {
         UsuarioEntity oUsuarioEntityFromSession = (UsuarioEntity) oHttpSession.getAttribute("usuario");

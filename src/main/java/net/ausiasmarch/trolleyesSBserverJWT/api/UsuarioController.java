@@ -77,7 +77,7 @@ public class UsuarioController {
     @Autowired
     FillService oFillService;
 
-    @PreAuthorize("@UsuarioAccessHandlerComponent.canGet(#id)")
+    @PreAuthorize("@UsuarioAccessHandlerComponent.canGetOne(#id)")
     //@PreAuthorize("@UsuarioBean.getId()==1")
     //@PreAuthorize("hasRole('ADMIN') or !hasRole('ADMIN') and #authUser.id == #userId")
     //@PreAuthorize("hasPermission(#id, 'usuario', 'GET')")
@@ -97,78 +97,67 @@ public class UsuarioController {
         System.out.println("Credentials: " + authentication.getCredentials());
         System.out.println("username from user: " + user.getUsername());
         System.out.println("-----------------");
-        
+
         if (oUsuarioRepository.existsById(id)) {
             return new ResponseEntity<UsuarioEntity>(oUsuarioRepository.getOne(id), HttpStatus.OK);
         } else {
             return new ResponseEntity<UsuarioEntity>(oUsuarioRepository.getOne(id), HttpStatus.NOT_FOUND);
         }
 
-
     }
 
-//    @PreAuthorize("hasRole('ADMIN')")
-//    @GetMapping("/all")
-//    public ResponseEntity<?> getAll() {
-//        UsuarioEntity oUsuarioEntityFromSession = (UsuarioEntity) oHttpSession.getAttribute("usuario");
-//        if (oUsuarioEntityFromSession == null) {
-//            return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-//        } else {
-//            if (oUsuarioEntityFromSession.getTipousuario().getId() == 1) {
-//                if (oUsuarioRepository.count() <= 1000) {
-//                    return new ResponseEntity<List<UsuarioEntity>>(oUsuarioRepository.findAll(), HttpStatus.OK);
-//                } else {
-//                    return new ResponseEntity<>(null, HttpStatus.PAYLOAD_TOO_LARGE);
-//                }
-//            } else {
-//                return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
-//            }
-//        }
+    @PreAuthorize("@UsuarioAccessHandlerComponent.isAdmin()")
+    @GetMapping("/all")
+    public ResponseEntity<?> getAll() {
+        if (oUsuarioRepository.count() <= 1000) {
+            return new ResponseEntity<List<UsuarioEntity>>(oUsuarioRepository.findAll(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(null, HttpStatus.PAYLOAD_TOO_LARGE);
+        }
+    }
+
+//    @PreAuthorize("@AccessHandler.canGet(#id)")
+//    //@PreAuthorize("hasRole('ADMIN')")
+//    @GetMapping("/admin/{id}")
+//    public ResponseEntity<?> getAdmin(
+//            @PathVariable(value = "id") Long id,
+//            Authentication authentication,
+//            Principal principal,
+//            @AuthenticationPrincipal User user
+//    ) {
+//        System.out.println("get_Admin.. " + id);
+//        System.out.println("Name:" + principal.getName());
+//        return new ResponseEntity<UsuarioEntity>(oUsuarioRepository.getOne(1L), HttpStatus.OK);
 //    }
-    @PreAuthorize("@AccessHandler.canGet(#id)")
-    //@PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/admin/{id}")
-    public ResponseEntity<?> getAdmin(
-            @PathVariable(value = "id") Long id,
-            Authentication authentication,
-            Principal principal,
-            @AuthenticationPrincipal User user
-    ) {
-        System.out.println("get_Admin.. " + id);
-        System.out.println("Name:" + principal.getName());
-        return new ResponseEntity<UsuarioEntity>(oUsuarioRepository.getOne(1L), HttpStatus.OK);
-    }
-
-    @PreAuthorize("@AccessHandler.canGet(#id)")
-    //@PreAuthorize("hasRole('USER')")
-    @GetMapping("/user/{id}")
-    public ResponseEntity<?> getUser(
-            @PathVariable(value = "id") Long id,
-            Authentication authentication,
-            Principal principal,
-            @AuthenticationPrincipal User user
-    ) {
-        System.out.println("get_User.. " + id);
-        System.out.println("Name:" + principal.getName());
-        return new ResponseEntity<UsuarioEntity>(oUsuarioRepository.getOne(3L), HttpStatus.OK);
-    }
-
-    @PreAuthorize("@AccessHandler.canGet(#id)")
-    //@PreAuthorize("hasRole('MANAGER')")
-    @GetMapping("/manager/{id}")
-    public ResponseEntity<?> getManager(
-            @PathVariable(value = "id") Long id,
-            Authentication authentication,
-            Principal principal,
-            @AuthenticationPrincipal User user
-    ) {
-        System.out.println("get_Manager.. " + id);
-        System.out.println("Name:" + principal.getName());
-        return new ResponseEntity<UsuarioEntity>(oUsuarioRepository.getOne(2L), HttpStatus.OK);
-    }
-
-    @PostMapping("/")
-    public ResponseEntity<?> create(@RequestBody UsuarioEntity oUsuarioEntityFromRequest) {
+//
+//    @PreAuthorize("@AccessHandler.canGet(#id)")
+//    //@PreAuthorize("hasRole('USER')")
+//    @GetMapping("/user/{id}")
+//    public ResponseEntity<?> getUser(
+//            @PathVariable(value = "id") Long id,
+//            Authentication authentication,
+//            Principal principal,
+//            @AuthenticationPrincipal User user
+//    ) {
+//        System.out.println("get_User.. " + id);
+//        System.out.println("Name:" + principal.getName());
+//        return new ResponseEntity<UsuarioEntity>(oUsuarioRepository.getOne(3L), HttpStatus.OK);
+//    }
+//    @PreAuthorize("@AccessHandler.canGet(#id)")
+//    //@PreAuthorize("hasRole('MANAGER')")
+//    @GetMapping("/manager/{id}")
+//    public ResponseEntity<?> getManager(
+//            @PathVariable(value = "id") Long id,
+//            Authentication authentication,
+//            Principal principal,
+//            @AuthenticationPrincipal User user
+//    ) {
+//        System.out.println("get_Manager.. " + id);
+//        System.out.println("Name:" + principal.getName());
+//        return new ResponseEntity<UsuarioEntity>(oUsuarioRepository.getOne(2L), HttpStatus.OK);
+//    }
+@PostMapping("/")
+        public ResponseEntity<?> create(@RequestBody UsuarioEntity oUsuarioEntityFromRequest) {
         UsuarioEntity oUsuarioEntityFromSession = (UsuarioEntity) oHttpSession.getAttribute("usuario");
         if (oUsuarioEntityFromSession == null) {
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
@@ -176,6 +165,7 @@ public class UsuarioController {
             if (oUsuarioEntityFromSession.getTipousuario().getId() == 1) {
                 oUsuarioEntityFromRequest.setId(null);
                 if (oUsuarioEntityFromRequest.getPassword() == null) {
+                    //pass allways sha256 encoded
                     oUsuarioEntityFromRequest.setPassword("da8ab09ab4889c6208116a675cad0b13e335943bd7fc418782d054b32fdfba04"); //trolleyes
                 }
                 oUsuarioEntityFromRequest.setToken(RandomHelper.getRandomHexString(20));
@@ -192,7 +182,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/count")
-    public ResponseEntity<?> count() {
+        public ResponseEntity<?> count() {
         UsuarioEntity oUsuarioEntityFromSession = (UsuarioEntity) oHttpSession.getAttribute("usuario");
         if (oUsuarioEntityFromSession == null) {
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
@@ -206,7 +196,7 @@ public class UsuarioController {
     }
 
     @PostMapping("/fill/{amount}")
-    public ResponseEntity<?> fill(@PathVariable(value = "amount") Long amount) {
+        public ResponseEntity<?> fill(@PathVariable(value = "amount") Long amount) {
         UsuarioEntity oUsuarioEntityFromSession = (UsuarioEntity) oHttpSession.getAttribute("usuario");
         if (oUsuarioEntityFromSession == null) {
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
@@ -220,7 +210,7 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable(value = "id") Long id) {
+        public ResponseEntity<?> delete(@PathVariable(value = "id") Long id) {
         UsuarioEntity oUsuarioEntityFromSession = (UsuarioEntity) oHttpSession.getAttribute("usuario");
         if (oUsuarioEntityFromSession == null) {
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
@@ -239,7 +229,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable(value = "id") Long id, @RequestBody UsuarioEntity oUsuarioEntityFromRequest) {
+        public ResponseEntity<?> update(@PathVariable(value = "id") Long id, @RequestBody UsuarioEntity oUsuarioEntityFromRequest) {
         UsuarioEntity oUsuarioEntityFromSession = (UsuarioEntity) oHttpSession.getAttribute("usuario");
         if (oUsuarioEntityFromSession == null) {
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
@@ -271,7 +261,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/page")
-    public ResponseEntity<?> getPage(@RequestParam("filter") Optional<String> strSearch, @PageableDefault(page = 0, size = 10, direction = Direction.ASC) Pageable oPageable) {
+        public ResponseEntity<?> getPage(@RequestParam("filter") Optional<String> strSearch, @PageableDefault(page = 0, size = 10, direction = Direction.ASC) Pageable oPageable) {
         Page<UsuarioEntity> oPage = null;
         UsuarioEntity oUsuarioEntityFromSession = (UsuarioEntity) oHttpSession.getAttribute("usuario");
         if (oUsuarioEntityFromSession == null) {
@@ -291,7 +281,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/page/tipousuario/{id}")
-    public ResponseEntity<?> getPageXTipousuario(@PageableDefault(page = 0, size = 10, direction = Direction.ASC) Pageable oPageable, @PathVariable(value = "id") Long id) {
+        public ResponseEntity<?> getPageXTipousuario(@PageableDefault(page = 0, size = 10, direction = Direction.ASC) Pageable oPageable, @PathVariable(value = "id") Long id) {
         UsuarioEntity oUsuarioEntityFromSession = (UsuarioEntity) oHttpSession.getAttribute("usuario");
         if (oUsuarioEntityFromSession == null) {
             return new ResponseEntity<>(null, HttpStatus.UNAUTHORIZED);
